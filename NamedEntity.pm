@@ -25,7 +25,7 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(extract_entities);
 
-our $VERSION = '1.92';
+our $VERSION = '1.93';
 
 
 # Regexps for constructing capitalised sequences
@@ -164,7 +164,7 @@ sub _combine_contexts {
     # another too!
     for my $e (@entities) {
         $combined{$e->{entity}}{entity} = $e->{entity};
-	$combined{$e->{entity}}{count} += $e->{count};
+        $combined{$e->{entity}}{count} += $e->{count};
         for my $class (keys %{$e->{scores}}) {
             $combined{$e->{entity}}{scores}{$class} += $e->{scores}{$class}
         }

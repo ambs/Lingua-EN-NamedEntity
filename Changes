@@ -1,5 +1,8 @@
 Revision history for Perl extension Lingua::EN::NamedEntity.
 
+1.93 Tue Oct  9 13:15:16 2015 - Runar Buvik
+    - Added and use local dictionary
+
 1.92 Tue Jun  4 10:04:06 WEST 2013
     - Add encoding directive to POD
 

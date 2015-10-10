@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 
 use DB_File;
+use IO::Zlib;
+
 my %wordlist;
 
 my $dir = './blib/lib/Lingua/EN/NamedEntity';
@@ -22,39 +24,20 @@ unless (-d $dir) {
 tie %wordlist, "DB_File", "$dir/wordlist"
   or die "Something went wrong with DB_File [$!]\n";
 
-print  "Looking for a wordlist...";
-my $words = -e "/usr/share/dict/words" ? "/usr/share/dict/words"
-  : -e "/usr/dict/words" && "/usr/dict/words";
+print  "Opening wordlist...\n";
+$dict = new IO::Zlib;
 
-if ($words && open DICT, $words) {
-    $|=1;
-    print  " I shall use $words\nThis will take some time. ";
-    my $size = -s $words;
-    my %said;
-    while (<DICT>) {
-        chomp;
-        next if /[A-Z]/;
-        my $percent = int(100*(tell(DICT)/$size));
-        print $percent, "% " if !($percent %10) and !($said{$percent}++);
-        $wordlist{$_}=1;
-    }
-    print  "\n";
-} else {
-    print  " I shall try and download one\n";
-    require LWP::Simple; import LWP::Simple;
-    my $wlz = get(q(ftp://ftp.fi.upm.es/pub/docs/dictionaries/ftp.funet.fi2/dictionaries/words-english.gz));
-    if ($wlz) {
-        require Compress::Zlib;
-        print  "I hope you have a lot of memory. This may hurt.\n";
-        my $wl = Compress::Zlib::uncompress($wlz);
-        for (split /\n/, $wl) {	# Ow, the pain
-            next if /[A-Z]/;
-            $wordlist{$_}=1;
-        }
-    } else {
-        die "No dice. Please install an operating system!\n";
-    }
+$dict->open("data/dictionary.gz", "rb") or die("Can not open wordlist dictionary.gz");
+my $count = 0;
+while (<$dict>) {
+    chomp;
+    next if /[A-Z]/;
+    $wordlist{$_}=1;
+
+    if ($count % 10000 == 0) {print "$count words done\n"; }
+    $count++;
 }
+print  "\n";
 
 print  "Converting the forename list\n";
 my %forename;
